@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "AI Studio Automator",
+  "version": "2.0.0",
+  "description": "Automates AI Studio with dynamic prompts, model selection, and advanced logging",
+  "permissions": ["tabs", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://aistudio.google.com/*",
+    "https://*.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open AI Studio Automator Dashboard"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["interceptor.js"],
+      "matches": ["https://aistudio.google.com/*"]
+    }
+  ]
+}
