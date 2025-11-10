@@ -40,10 +40,29 @@ const Utils = {
           .length;
   },
 
-  getWords: (() => {
+  // Check if text uses whitespace (5% threshold, same as countWords)
+  hasWhitespace(text) {
+    const t = text.trim();
+    return (t.match(/\s+/g) || []).length / t.length > 0.05;
+  },
+
+  // Split text into units using the SAME logic as countWords:
+  // - Whitespace languages: split by spaces into words
+  // - Non-whitespace languages: split by GRAPHEMES
+  getTextUnits: (() => {
     const cache = new Map();
     return (text) => {
-      if (!cache.has(text)) cache.set(text, text.split(/\s+/).filter(Boolean));
+      if (!cache.has(text)) {
+        const hasSpaces = Utils.hasWhitespace(text);
+        const units = hasSpaces
+          ? text.split(/\s+/).filter(Boolean)
+          : [
+              ...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(
+                text
+              ),
+            ].map((s) => s.segment);
+        cache.set(text, { units, hasSpaces });
+      }
       return cache.get(text);
     };
   })(),
@@ -143,7 +162,8 @@ class GroupBuilder {
   }
 
   getCombinations() {
-    const last5 = this.groupDataArray.slice(-5);
+    // Get the 5 groups BEFORE the current one (which was just pushed)
+    const last5 = this.groupDataArray.slice(-6, -1);
     if (last5.length < 5)
       return { prev5: null, prev5choose4: [], prev5choose3: [] };
 
@@ -184,7 +204,6 @@ class GroupBuilder {
   }
 
   buildSpecifications(groups, lackingIndices) {
-    // Simplified specification builder
     return lackingIndices
       .filter((i) => {
         const [prev, lack] = [groups[i - 1], groups[i]].map(
@@ -201,53 +220,109 @@ class GroupBuilder {
       (g) => this.groupLookup[g.markerId]
     );
 
-    const total = prev.wordCount + lack.wordCount;
-    const ratio = (val) => parseFloat((val / total).toFixed(4));
-    const words = Utils.getWords([prev.text, lack.text].join(" "));
-    const splitIdx = Math.round(words.length * ratio(prev.wordCount));
+    const totalOriginalWords = prev.wordCount + lack.wordCount;
+
+    // Reconstruct merged text from ORIGINAL captions to avoid double-spacing
+    const allCaptions = [...prev.captions, ...lack.captions];
+
+    // Determine language type from original captions
+    const sampleText = allCaptions.map((c) => c.text).join("");
+    const hasSpaces = Utils.hasWhitespace(sampleText);
+
+    // Merge based on language type
+    const mergedText = hasSpaces
+      ? allCaptions.map((c) => c.text).join(" ")
+      : allCaptions.map((c) => c.text).join("");
+
+    // Split into units based on language type
+    const units = hasSpaces
+      ? mergedText.split(/\s+/).filter(Boolean)
+      : [
+          ...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(
+            mergedText
+          ),
+        ].map((s) => s.segment);
+
+    // Calculate split index using original word count ratio
+    const splitIdx = Math.round(
+      units.length * (prev.wordCount / totalOriginalWords)
+    );
+
+    const actualTotal = units.length;
+    const ratio = (val) =>
+      actualTotal > 0 ? parseFloat((val / actualTotal).toFixed(4)) : 0;
+    const joinUnits = (arr) => (hasSpaces ? arr.join(" ") : arr.join(""));
 
     const markers = [
-      { group: prev, item: prevItem, words: words.slice(0, splitIdx) },
-      { group: lack, item: lackItem, words: words.slice(splitIdx) },
+      { group: prev, item: prevItem, units: units.slice(0, splitIdx) },
+      { group: lack, item: lackItem, units: units.slice(splitIdx) },
     ]
-      .filter(({ words }) => words.length)
-      .map(({ group, item, words }) => ({
-        markerId: item.markerId,
-        ratio: ratio(group.wordCount),
-        dist: group.captions.map((c) => ratio(c.wordCount)),
-        text: words.join(" "),
-        text_translation: "",
-        from: this.distributeWords(group.captions, words),
-      }));
+      .filter(({ units }) => units.length)
+      .map(({ group, item, units }) => {
+        const actualCount = units.length;
+
+        // Calculate dist from original captions - this is our distribution template
+        const groupTotal = group.captions.reduce(
+          (sum, c) => sum + c.wordCount,
+          0
+        );
+        const dist = group.captions.map((c) =>
+          groupTotal > 0 ? c.wordCount / groupTotal : 0
+        );
+
+        // Use dist to distribute units to captions
+        let idx = 0;
+        let remainingUnits = actualCount;
+
+        const from = group.captions
+          .map((cap, i, arr) => {
+            const isLast = i === arr.length - 1;
+            // Use dist[i] ratio to calculate count
+            const count = isLast
+              ? remainingUnits
+              : Math.round(actualCount * dist[i]);
+
+            const text = joinUnits(units.slice(idx, idx + count));
+            idx += count;
+            remainingUnits -= count;
+
+            return cap.idx !== null && text
+              ? {
+                  idx: cap.idx,
+                  start: cap.start,
+                  end: cap.end,
+                  word_count: count,
+                  content: text,
+                  content_translation: "",
+                  ...(cap.trans && { trans: cap.trans }),
+                }
+              : null;
+          })
+          .filter(Boolean);
+
+        // Output dist based on ACTUAL distributed counts
+        const distOutput = from.map((f) => ratio(f.word_count));
+
+        return {
+          markerId: item.markerId,
+          ratio: ratio(actualCount),
+          dist: distOutput,
+          text: joinUnits(units),
+          text_translation: "",
+          from,
+        };
+      });
 
     return {
       markerStr: markers.map((m) => m.markerId.split("-")[0]).join(""),
-      detail: { start: prev.start, end: lack.end, wordCount: total, markers },
+      detail: {
+        start: prev.start,
+        end: lack.end,
+        wordCount: actualTotal,
+        totalText: mergedText,
+        markers,
+      },
     };
-  }
-
-  distributeWords(captions, words) {
-    let idx = 0;
-    return captions
-      .map((cap, i, arr) => {
-        const count =
-          i === arr.length - 1
-            ? words.length - idx
-            : Math.round(words.length * (cap.wordCount / words.length));
-        const text = words.slice(idx, idx + count).join(" ");
-        idx += count;
-        return cap.idx !== null && text
-          ? {
-              idx: cap.idx,
-              start: cap.start,
-              end: cap.end,
-              content: text,
-              content_translation: "",
-              ...(cap.trans && { trans: cap.trans }),
-            }
-          : null;
-      })
-      .filter(Boolean);
   }
 }
 
@@ -357,14 +432,16 @@ const XmlParser = {
         const isLast = j === numGroups - 1 && i < realGroups.length - 1;
 
         if (isLast && rng.next() < chance / 100) {
-          const words = Utils.getWords(g.grouptext);
-          if (words.length > 2) {
+          const { units, hasSpaces } = Utils.getTextUnits(g.grouptext);
+          if (units.length > 2) {
             const split = Math.max(
               1,
-              Math.floor(words.length * (0.4 + rng.next() * 0.2))
+              Math.floor(units.length * (0.4 + rng.next() * 0.2))
             );
-            parts.push(`(${g.marker}) ${words.slice(0, split).join(" ")}`);
-            carryOver = words.slice(split).join(" ");
+            const joinUnits = (arr) =>
+              hasSpaces ? arr.join(" ") : arr.join("");
+            parts.push(`(${g.marker}) ${joinUnits(units.slice(0, split))}`);
+            carryOver = joinUnits(units.slice(split));
             i++;
             break;
           }
@@ -485,7 +562,7 @@ const Converters = {
     for (let i = 1; i < parts.length; i += 2) {
       const match = parts[i].match(/\w/);
       if (!match) continue;
-      
+
       const marker = match[0];
       counter[marker] = (counter[marker] || 0) + 1;
       result.push({
