@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "AI Studio Automator",
+  "version": "1.0.0",
+  "description": "Automate Google AI Studio with multi-tab support",
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://aistudio.google.com/*"],
+      "js": ["shared-config.js", "shared-utils.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["interceptor.js", "shared-config.js"],
+      "matches": ["https://aistudio.google.com/*"]
+    }
+  ],
+
+  "action": {
+    "default_title": "AI Studio Automator"
+  },
+
+  "permissions": ["tabs", "scripting"],
+
+  "host_permissions": ["https://aistudio.google.com/*"]
+}
