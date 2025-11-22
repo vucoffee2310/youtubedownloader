@@ -1,0 +1,778 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-app: #0f0f23;
+    --bg-surface: #1a1b2e;
+    --bg-card: #252640;
+    --bg-hover: #2f3050;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: #334155;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+}
+
+body.light-theme {
+    --bg-app: #f8fafc;
+    --bg-surface: #fff;
+    --bg-card: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-bar {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.new-tab-btn {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    font-size: 1.125rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    touch-action: none;
+    user-select: none;
+}
+
+.new-tab-btn:hover {
+    background: var(--accent-hover);
+}
+
+.tabs-bar-content {
+    flex: 1;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+}
+
+.tab-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tab-chip:hover {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+}
+
+.tab-chip.loading {
+    background: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-primary);
+    opacity: 0.8;
+}
+
+.tab-chip.ready {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tab-chip.error {
+    background: var(--error);
+    border-color: var(--error);
+    color: #fff;
+}
+
+.tab-chip.active {
+    border-color: var(--success);
+    background: var(--success);
+    color: #fff;
+}
+
+.tab-chip-spinner {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    margin-right: 0.25rem;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.tab-chip-badge {
+    position: absolute;
+    top: -0.375rem;
+    right: -0.375rem;
+    background: var(--error);
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.75rem;
+    min-width: 1.25rem;
+    text-align: center;
+    border: 2px solid var(--bg-surface);
+}
+
+.tab-chip-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.tab-chip-id {
+    font-weight: 600;
+    font-family: Consolas, Monaco, monospace;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+}
+
+.tab-chip-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.tab-chip-action {
+    background: transparent;
+    border: 0;
+    color: currentColor;
+    cursor: pointer;
+    padding: 0.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    opacity: 0.8;
+}
+
+.tab-chip-action:hover:not(:disabled) {
+    opacity: 1;
+}
+
+.tab-chip-action:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.tab-chip-action.settings:hover:not(:disabled) {
+    background: var(--accent);
+    color: #fff;
+}
+
+.tab-chip-action.run:hover:not(:disabled) {
+    background: var(--success);
+    color: #fff;
+}
+
+.tab-chip-action.audio:hover:not(:disabled) {
+    background: var(--info);
+    color: #fff;
+}
+
+.tab-chip-action.save:hover:not(:disabled) {
+    background: var(--warning);
+    color: #fff;
+}
+
+.tab-chip-action.clear:hover:not(:disabled),
+.tab-chip-action.close:hover:not(:disabled) {
+    background: var(--error);
+    color: #fff;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: 0;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-hover);
+}
+
+.btn-danger {
+    background: var(--error);
+    color: #fff;
+}
+
+.tabs-row {
+    background: var(--bg-surface);
+    border-bottom: 2px solid var(--border);
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.tab {
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: -2px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--accent);
+    background: var(--bg-hover);
+}
+
+.tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--bg-app);
+}
+
+.badge {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-weight: 700;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.tab.active .badge {
+    background: var(--accent);
+    color: #fff;
+}
+
+.stats {
+    display: none;
+    gap: 2rem;
+    padding: 0.75rem 0;
+}
+
+.stats.active {
+    display: flex;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.stat-value {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tab-content {
+    display: none;
+    flex: 1;
+    overflow: hidden;
+}
+
+.tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    flex: 1;
+}
+
+.log-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    flex: 1;
+}
+
+.panel-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.panel-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.panel-body {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-app);
+    min-height: 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    padding: 2rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: 0.875rem;
+}
+
+.response-content {
+    margin: 1rem 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    line-height: 1.7;
+}
+
+.response-content pre {
+    margin: 0;
+    font: inherit;
+    white-space: pre-wrap;
+    display: inline;
+}
+
+.live-cursor {
+    display: inline-block;
+    width: 0.375rem;
+    height: 1.2em;
+    background: var(--accent);
+    margin-left: 0.25rem;
+    vertical-align: text-bottom;
+    border-radius: 0.125rem;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.log-container {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-app);
+    min-height: 0;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.log-header {
+    position: sticky;
+    top: 0;
+    background: var(--bg-surface);
+    border-bottom: 2px solid var(--border);
+    z-index: 10;
+}
+
+.log-header th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+}
+
+.log-row {
+    border-bottom: 1px solid var(--border);
+}
+
+.log-row:hover {
+    background: var(--bg-surface);
+}
+
+.log-row td {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+}
+
+.log-time,
+.log-fn,
+.log-dur,
+.log-msg {
+    font-family: Consolas, Monaco, monospace;
+}
+
+.log-time {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.log-fn {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.log-dur {
+    color: var(--warning);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.log-msg {
+    color: var(--text-primary);
+    word-break: break-word;
+    white-space: normal;
+}
+
+.log-row.success .log-msg {
+    color: var(--success);
+}
+
+.log-row.error .log-msg {
+    color: var(--error);
+    font-weight: 600;
+}
+
+.log-row.warn .log-msg {
+    color: var(--warning);
+}
+
+.log-row.info .log-msg {
+    color: var(--info);
+}
+
+.log-row.think .log-msg {
+    color: #a78bfa;
+}
+
+.log-row.stream .log-msg {
+    color: #2dd4bf;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 42rem;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: transparent;
+    border: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: var(--error);
+    color: #fff;
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.625rem;
+    background: var(--bg-app);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.form-control:focus {
+    outline: 0;
+    border-color: var(--accent);
+}
+
+textarea.form-control {
+    font-family: Consolas, Monaco, monospace;
+    min-height: 8rem;
+    resize: vertical;
+}
+
+select.form-control {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-app);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+
+.checkbox-group:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.checkbox-label {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.checkbox-description {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+.tab-chip,
+.log-row,
+.response-content,
+.panel-body {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.log-table,
+.tab-chip-main,
+.stats {
+    contain: layout style;
+}

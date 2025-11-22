@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Studio Automator</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="tabs-bar">
+        <button
+          class="new-tab-btn"
+          id="newTabBtn"
+          title="Click: New tab | Hold 2s: Toggle theme"
+        >
+          +
+        </button>
+        <div class="tabs-bar-content" id="connectedTabsContainer">
+          <span style="color: var(--text-muted); font-size: 0.75rem"
+            >No tabs connected</span
+          >
+        </div>
+      </div>
+      <div class="tabs-row">
+        <div class="tabs">
+          <button class="tab active" data-tab="logs">
+            📋 Logs <span class="badge" id="logsBadge">0</span>
+          </button>
+          <button class="tab" data-tab="thinking">
+            🤔 Thinking <span class="badge" id="thinkingBadge">0</span>
+          </button>
+          <button class="tab" data-tab="streaming">
+            ✨ Response <span class="badge" id="streamingBadge">0</span>
+          </button>
+        </div>
+        <div class="stats" id="xhrStats"></div>
+      </div>
+      <div class="tab-content active" id="logsTab">
+        <div class="log-panel">
+          <div class="log-container">
+            <table class="log-table">
+              <thead class="log-header">
+                <tr>
+                  <th style="width: 90px">Time</th>
+                  <th style="width: 140px">Function</th>
+                  <th style="width: 70px; text-align: right">Duration</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody">
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <div class="empty-icon">📋</div>
+                      <div class="empty-text">No tab selected</div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="thinkingTab">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🤔 Thinking Process</div>
+            <button class="btn btn-primary" id="copyThinking">📋 Copy</button>
+          </div>
+          <div class="panel-body" id="thinkingBody">
+            <div class="empty-state">
+              <div class="empty-icon">🤔</div>
+              <div class="empty-text">No tab selected</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="streamingTab">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">✨ Streaming Response</div>
+            <button class="btn btn-primary" id="copyStreaming">📋 Copy</button>
+          </div>
+          <div class="panel-body" id="streamingBody">
+            <div class="empty-state">
+              <div class="empty-icon">✨</div>
+              <div class="empty-text">No streaming data yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">
+              ⚙️ Settings for Tab #<span id="editTabId">-</span>
+            </h2>
+            <button class="modal-close" id="closeSettings">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label" for="promptInput"
+                >📝 Prompt
+                <span class="form-badge" id="promptLength">0 chars</span></label
+              >
+              <textarea
+                id="promptInput"
+                class="form-control"
+                style="min-height: 10rem"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modelSelect">🤖 Model</label>
+              <select class="form-control" id="modelSelect">
+                <option value="gemini-3-pro-preview">
+                  Gemini 3 Pro (Preview)
+                </option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                <option value="gemini-flash-latest">
+                  Gemini Flash (Latest)
+                </option>
+                <option value="gemini-flash-lite-latest">
+                  Gemini Flash Lite (Latest)
+                </option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="temperatureInput"
+                  >🌡️ Temperature</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="temperatureInput"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value="1.5"
+                />
+              </div>
+              <div class="form-group" id="budgetGroup">
+                <label class="form-label" for="budgetInput"
+                  >🧠 Thinking Budget</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="budgetInput"
+                  min="0"
+                  max="10000"
+                  step="100"
+                  value="500"
+                />
+              </div>
+              <div class="form-group" id="levelGroup" style="display: none">
+                <label class="form-label" for="levelSelect"
+                  >🧠 Thinking Level</label
+                >
+                <select class="form-control" id="levelSelect">
+                  <option value="low">Low (Optimizes for latency)</option>
+                  <option value="high">High (Maximizes reasoning depth)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="topPInput">🎯 Top P</label>
+              <input
+                type="number"
+                class="form-control"
+                id="topPInput"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.5"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">🔊 Audio</label>
+              <label class="checkbox-group">
+                <input type="checkbox" id="autoAudioCheckbox" />
+                <span class="checkbox-label">
+                  Auto-start audio for this tab
+                  <span class="checkbox-description"
+                    >Automatically play audio when tab connects</span
+                  >
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="resetSettingsBtn">
+              🔄 Reset to Default
+            </button>
+            <button class="btn btn-success" id="saveSettingsBtn">
+              💾 Save Settings
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="shared-config.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="dashboard-core.js"></script>
+    <script src="dashboard-tabs.js"></script>
+    <script src="dashboard-ui.js"></script>
+  </body>
+</html>
