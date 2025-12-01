@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini TTS",
+  "version": "1.0",
+  "description": "Text-to-Speech using Gemini",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*"
+  ],
+  "action": {},
+  "background": {
+    "service_worker": "background.js"
+  }
+}
