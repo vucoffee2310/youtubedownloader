@@ -1,0 +1,157 @@
+export const CONFIG = Object.freeze({
+  FONT: Object.freeze({
+    NAME: "Open Sans",
+    FILE: "OpenSans_SemiCondensed-Medium.ttf",
+    URL: "./OpenSans_SemiCondensed-Medium.ttf",
+  }),
+  PDF: Object.freeze({
+    WORKER_SRC:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+    SCALE: 1.3,
+    IMAGE_FORMAT: "image/jpeg",
+    IMAGE_QUALITY: 0.85,
+    RENDER_BATCH_SIZE: 10,
+    RENDER_INTENT: "print",
+  }),
+  OVERLAY: Object.freeze({
+    MIN_HEIGHT: 25,
+    MIN_FONT_SIZE: 4,
+    MAX_FONT_SIZE: 150,
+    OVERFLOW_TOLERANCE: 0.5,
+    FONT_SIZE_GUESS_MULTIPLIER: 1.8,
+    FONT_SIZE_UPSCALE_MULTIPLIER: 1.5,
+    BINARY_SEARCH_ITERATIONS: 10,
+    BINARY_SEARCH_PRECISION: 0.5,
+  }),
+  MERGE: Object.freeze({
+    TOLERANCE_HORIZONTAL: 10,
+    TOLERANCE_VERTICAL_MULTIPLIER: 0.5,
+    MIN_GAP: -2,
+  }),
+  CACHE: Object.freeze({
+    MAX_FONT_SIZE_CACHE: 500,
+    MAX_TABLE_LAYOUT_CACHE: 500,
+    MAX_PAGE_CACHE: 100,
+  }),
+  RENDER: Object.freeze({
+    INTERSECTION_ROOT_MARGIN: "500px 0px",
+    INTERSECTION_THRESHOLD: 0,
+    BATCH_DELAY: 0,
+    QUEUE_SORT_WINDOW_CENTER: 2,
+  }),
+  TABLE: Object.freeze({
+    CELL_PADDING: 4,
+    BORDER_WIDTH: 1,
+    LINE_HEIGHT: 1.25,
+    HEADER_BOOST: 1.15,
+    MIN_COL_PERCENT: 8,
+    MAX_COL_PERCENT: 60,
+    COL_DIVISOR: 2.5,
+    MAX_ITERATIONS: 15,
+    SCALE_FACTOR: 1.1,
+    REDUCE_FACTOR: 0.9,
+    HEADROOM_THRESHOLD: 0.6,
+    REDISTRIBUTION_FACTOR: 0.5,
+    MAX_SCALE_HEADER: 2.0,
+    MAX_SCALE_DATA: 2.5,
+    MIN_SCALE: 1.0,
+    SCALE_ADJUSTMENT: 0.97,
+    WRAP_WIDTH_FACTOR: 0.9,
+  }),
+  PDF_RENDERER: Object.freeze({
+    BASELINE_RATIO_DEFAULT: 0.78,
+    LIST_BULLET_INDENT: 0.5,
+    LIST_CONTINUATION_INDENT: 0.3,
+    LIST_LINE_HEIGHT: 1.3,
+    LIST_ITEM_SPACING: 0.4,
+    TABLE_HEADER_OPACITY: 0.15,
+    TABLE_ROW_EVEN_OPACITY: 0.08,
+    TABLE_ROW_ODD_OPACITY: 0.05,
+  }),
+  EXPORT: Object.freeze({
+    HTML_IMAGE_FORMAT: "image/jpeg",
+    HTML_IMAGE_QUALITY: 0.85,
+    PDF_SAVE_DELAY: 300,
+    FILENAME_PADDING: 3,
+  }),
+  UI: Object.freeze({
+    DEBOUNCE_DELAY: 300,
+    DEBOUNCE_SLIDER: 150,
+    DEBOUNCE_TEXT: 500,
+    COORD_APPLY_DELAY: 300,
+  }),
+  COORDINATES: Object.freeze({
+    LETTERS: ["T", "L", "B", "R"],
+    MAP: Object.freeze({ T: 0, L: 1, B: 2, R: 3 }),
+    DEFAULT_ORDER: "TLBR",
+    ORDERINGS: Object.freeze(
+      ["TLBR", "LTRB", "LBRT", "BLTR", "TRBL", "TBRL"].map((order) =>
+        Object.freeze({ order, name: order.split("").join("-") })
+      )
+    ),
+  }),
+  CONTENT_TYPES: Object.freeze({
+    TEXT: "text",
+    LIST: "list",
+    TABLE: "table",
+    CODE: "code",
+    IMAGE: "image",
+  }),
+  COLOR_PALETTES: Object.freeze({
+    cream: Object.freeze([[254, 250, 234], [60, 50, 40], [230, 220, 200], 97]),
+    sepia: Object.freeze([[244, 237, 219], [74, 59, 44], [220, 210, 190], 96]),
+    mint: Object.freeze([[240, 248, 240], [45, 65, 55], [215, 230, 215], 95]),
+    darkOlive: Object.freeze([[42, 48, 42], [230, 235, 220], [60, 70, 60], 98]),
+    charcoal: Object.freeze([[40, 44, 52], [230, 237, 243], [60, 68, 78], 99]),
+    highContrast: Object.freeze([
+      [235, 235, 235],
+      [0, 0, 0],
+      [60, 60, 60],
+      100,
+    ]),
+    dyslexia: Object.freeze([
+      [255, 253, 208],
+      [20, 20, 20],
+      [240, 235, 180],
+      98,
+    ]),
+  }),
+  DEFAULT_PALETTE: "cream",
+  REGEX: Object.freeze({
+    LIST_BULLET: /^[•\-*]\s/,
+    NEWLINE: /\r?\n/,
+    BR_TAG: /<br\s*\/?>/gi,
+  }),
+  VALIDATION: Object.freeze({
+    MIN_PAGE: 1,
+    MIN_EXPAND_AMOUNT: 1,
+    EXPAND_WARNING_THRESHOLD: 100,
+  }),
+  MESSAGES: Object.freeze({
+    NO_FILE: "No file",
+    USING_DEFAULT: "Default",
+    LOADING_PDF: "Loading PDF...",
+    INVALID_COORDINATE:
+      "Invalid coordinate order: must contain T, L, B, R exactly once",
+    FONT_LOAD_ERROR: "Could not load font. PDF will use default font.",
+    PDF_LOAD_ERROR: "Error loading PDF",
+    OPERATION_IN_PROGRESS: "Please wait for the current operation to complete.",
+    DELETE_CONFIRM: "Delete this overlay?",
+    JSON_MISMATCH_WARNING:
+      "Loading new overlay data. Make sure this JSON matches your PDF. Continue?",
+    EXPAND_LARGE_WARNING: "Expand by {amount}px? This may cause overlaps.",
+    SPLIT_ALL_CONFIRM: "Split {total} pages into individual files?",
+    SPLIT_BY_FILES_CONFIRM:
+      "Split {total} pages into {numFiles} files (~{pagesPerFile} pages each)?",
+    SPLIT_BY_PAGES_CONFIRM:
+      "Split into {numFiles} files ({pagesPerFile} pages each)?",
+    EXPORT_PAGES_CONFIRM: "Export {count} pages? ({list})",
+    APPLY_ALL_CONFIRM: 'Apply "{order}" to ALL pages?',
+    INVALID_PAGE_SPEC:
+      'Invalid page specification. Examples: "1,5,10" or "1-5,10,15-20"',
+    INVALID_EXPAND_AMOUNT: "Please enter a valid positive number",
+    RANGE_ERROR_POSITIVE: "Page numbers must be positive",
+    RANGE_ERROR_ORDER: "Start page must be ≤ end page",
+    RANGE_ERROR_EXCEEDS: "End page exceeds total pages ({max})",
+  }),
+});

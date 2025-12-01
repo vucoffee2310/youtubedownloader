@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Studio Automator</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Common: Tabs Bar -->
+    <div class="tabs-bar">
+      <button class="new-tab-btn" id="newTabBtn" title="New Tab">
+        <svg viewBox="0 0 24 24" data-icon="plus"></svg>
+      </button>
+      <div class="tabs-container" id="tabsContainer">
+        <span class="no-tabs-msg">No tabs connected</span>
+      </div>
+    </div>
+
+    <!-- Type: None -->
+    <div class="type-container active" id="typeNone">
+      <div class="empty-state full">
+        <svg class="empty-icon" viewBox="0 0 24 24" data-icon="layout"></svg>
+        <div class="empty-title">No Tab Selected</div>
+        <div class="empty-text">Select or create a tab</div>
+      </div>
+    </div>
+
+    <!-- Type: Regular -->
+    <div class="type-container" id="typeRegular">
+      <!-- Regular: Action Bar -->
+      <div class="action-bar" id="regularActionBar">
+        <!-- Group 1: Run | Settings | Audio -->
+        <div class="action-group" id="regularActions">
+          <button class="action-btn" id="runBtn" title="Run" disabled>
+            <svg viewBox="0 0 24 24" data-icon="play"></svg>
+          </button>
+          <!-- Settings Dropdown -->
+          <div class="dropdown" id="settingsDropdown">
+            <button class="action-btn dropdown-trigger" title="Settings" disabled>
+              <svg viewBox="0 0 24 24" data-icon="settings"></svg>
+            </button>
+            <div class="dropdown-menu dropdown-lg" id="settingsMenu">
+              <div class="dropdown-section">
+                <label class="dropdown-label">Prompt <span id="promptLength">0</span></label>
+                <textarea id="promptInput" class="dropdown-textarea" placeholder="Enter prompt..."></textarea>
+              </div>
+              <div class="dropdown-section">
+                <label class="dropdown-label">Model</label>
+                <select id="modelSelect" class="dropdown-input">
+                  <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                  <option value="gemini-flash-latest">Gemini Flash</option>
+                  <option value="gemini-flash-lite-latest">Gemini Flash Lite</option>
+                </select>
+              </div>
+              <div class="dropdown-grid">
+                <div class="dropdown-section">
+                  <label class="dropdown-label">Temp</label>
+                  <input type="number" id="temperatureInput" class="dropdown-input" min="0" max="2" step="0.1" value="1.5" />
+                </div>
+                <div class="dropdown-section">
+                  <label class="dropdown-label">Top P</label>
+                  <input type="number" id="topPInput" class="dropdown-input" min="0" max="1" step="0.05" value="0.5" />
+                </div>
+              </div>
+              <div class="dropdown-section" id="budgetGroup">
+                <label class="dropdown-label">Budget</label>
+                <input type="number" id="budgetInput" class="dropdown-input" min="0" max="10000" step="100" value="500" />
+              </div>
+              <div class="dropdown-section" id="levelGroup" style="display:none">
+                <label class="dropdown-label">Level</label>
+                <select id="levelSelect" class="dropdown-input">
+                  <option value="low">Low</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div class="dropdown-section">
+                <label class="dropdown-check">
+                  <input type="checkbox" id="autoAudioCheckbox" />
+                  <span>Auto-start audio</span>
+                </label>
+              </div>
+              <div class="dropdown-footer">
+                <button class="dropdown-btn secondary" id="settingsResetBtn">Reset</button>
+                <button class="dropdown-btn primary" id="settingsSaveBtn">Save</button>
+              </div>
+            </div>
+          </div>
+          <button class="action-btn" id="audioBtn" title="Audio" disabled>
+            <svg viewBox="0 0 24 24" data-icon="volume-on" id="iconAudioOff"></svg>
+            <svg viewBox="0 0 24 24" data-icon="volume-off" id="iconAudioOn" style="display:none"></svg>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Group 2: Thinking | Streaming | Logs | More -->
+        <div class="action-group" id="regularViews">
+          <button class="action-btn" id="thinkingViewBtn" title="Thinking">
+            <svg viewBox="0 0 24 24" data-icon="help-circle"></svg>
+            <span class="badge" id="thinkingBadge">0</span>
+          </button>
+          <button class="action-btn" id="streamingViewBtn" title="Streaming">
+            <svg viewBox="0 0 24 24" data-icon="zap"></svg>
+            <span class="badge" id="streamingBadge">0</span>
+          </button>
+          <button class="action-btn active" id="logsViewBtn" title="Logs">
+            <svg viewBox="0 0 24 24" data-icon="file-text"></svg>
+            <span class="badge" id="logsBadge">0</span>
+          </button>
+          <!-- More Dropdown -->
+          <div class="dropdown" id="moreDropdown">
+            <button class="action-btn dropdown-trigger" title="More" disabled>
+              <svg viewBox="0 0 24 24" data-icon="more-vertical"></svg>
+            </button>
+            <div class="dropdown-menu" id="moreMenu">
+              <button class="dropdown-item" id="copyBtn">
+                <svg viewBox="0 0 24 24" data-icon="copy"></svg>Copy
+              </button>
+              <button class="dropdown-item" id="saveBtn">
+                <svg viewBox="0 0 24 24" data-icon="download"></svg>Save
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item danger" id="clearBtn">
+                <svg viewBox="0 0 24 24" data-icon="trash"></svg>Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="action-btn" id="themeToggle" title="Theme">
+          <svg viewBox="0 0 24 24" data-icon="sun"></svg>
+        </button>
+      </div>
+
+      <!-- Regular: Content Area -->
+      <div class="content-area" id="regularContent">
+        <div class="view-panel" id="thinkingView">
+          <div class="data-view scroll-area" id="thinkingData"></div>
+        </div>
+        <div class="view-panel" id="streamingView">
+          <div class="data-view scroll-area" id="streamingData"></div>
+        </div>
+        <div class="view-panel active" id="logsView">
+          <div class="scroll-area">
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th style="width:80px">Time</th>
+                  <th style="width:120px">Fn</th>
+                  <th style="width:60px">Dur</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type: Batch (Placeholder) -->
+    <div class="type-container" id="typeBatch">
+      <div class="action-bar" id="batchActionBar">
+        <span class="type-label"><span class="type-badge batch">B</span>Batch</span>
+        <div class="spacer"></div>
+        <button class="action-btn" id="themeToggleBatch" title="Theme">
+          <svg viewBox="0 0 24 24" data-icon="sun"></svg>
+        </button>
+      </div>
+      <div class="content-area" id="batchContent">
+        <div class="empty-state full">
+          <svg class="empty-icon" viewBox="0 0 24 24" data-icon="monitor"></svg>
+          <div class="empty-title">Batch Mode</div>
+          <div class="empty-text">Coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type: Edit (Placeholder) -->
+    <div class="type-container" id="typeEdit">
+      <div class="action-bar" id="editActionBar">
+        <span class="type-label"><span class="type-badge edit">E</span>Edit</span>
+        <div class="spacer"></div>
+        <button class="action-btn" id="themeToggleEdit" title="Theme">
+          <svg viewBox="0 0 24 24" data-icon="sun"></svg>
+        </button>
+      </div>
+      <div class="content-area" id="editContent">
+        <div class="empty-state full">
+          <svg class="empty-icon" viewBox="0 0 24 24" data-icon="edit"></svg>
+          <div class="empty-title">Edit Mode</div>
+          <div class="empty-text">Coming soon</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="shared-config.js"></script>
+  <script src="shared-utils.js"></script>
+  <script src="dashboard-core.js"></script>
+  <script src="dashboard-tabs.js"></script>
+  <script src="dashboard-ui.js"></script>
+</body>
+</html>

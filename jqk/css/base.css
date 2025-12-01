@@ -1,0 +1,167 @@
+/* --- Font Definitions --- */
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../OpenSans_SemiCondensed-Medium.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../JetBrainsMono-Medium.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- Global Resets & Body --- */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-root); 
+  color: var(--text-main);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  overflow-y: scroll;
+}
+
+/* --- Main Layout --- */
+main#pdf-container {
+  padding: 20px;
+  min-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- PDF Page Wrapper --- */
+.page-wrapper {
+  position: relative;
+  margin: 0 auto 30px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
+  width: 100%;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.page-wrapper:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* --- Placeholder / Loading States --- */
+.page-placeholder {
+  background-color: var(--bg-input);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 1px dashed var(--border-contrast);
+}
+
+.page-placeholder span {
+  font-size: 14px;
+  font-family: monospace;
+  color: var(--text-dim);
+}
+
+.loading {
+  text-align: center;
+  padding: 60px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --- Per-Page Export Controls (Floating Bottom-Right) --- */
+.page-export-controls {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page-wrapper:hover .page-export-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.page-export-btn {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background-color: var(--bg-toolbar);
+  color: var(--text-main);
+  border: 1px solid var(--border-contrast);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-export-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-color);
+  color: #fff;
+}
+
+/* --- Print Styles --- */
+@media print {
+  body {
+    background: none;
+    color: #000;
+  }
+  
+  header#controls,
+  .delete-overlay-btn,
+  .page-coord-controls,
+  .page-export-controls {
+    display: none !important;
+  }
+
+  main#pdf-container {
+    margin: 0;
+    padding: 0;
+    display: block;
+  }
+
+  .page-wrapper {
+    box-shadow: none;
+    margin: 0;
+    break-inside: avoid;
+    border: none;
+  }
+
+  .page-wrapper + .page-wrapper {
+    break-before: page;
+  }
+
+  .page-wrapper, canvas { 
+    print-color-adjust: exact; 
+    -webkit-print-color-adjust: exact; 
+  }
+
+  @page {
+    size: auto;
+    margin: 0;
+  }
+}

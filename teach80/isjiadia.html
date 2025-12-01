@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Grayscale</title>
+</head>
+<body>
+    <h2>PDF to Grayscale Converter</h2>
+
+    <input type="file" id="fileInput" accept=".pdf">
+
+    <div id="controlsPanel">
+        <div>
+            <span>Pages: <strong id="totalPages">-</strong></span>
+            <span>Size: <strong id="outSize">-</strong></span>
+        </div>
+
+        <div>
+            <label>DPI:</label>
+            <input type="range" id="dpiRange" min="72" max="300" value="150" step="1">
+            <span id="dpiValue">150 DPI</span>
+        </div>
+
+        <div id="qualityRow">
+            <label>Quality:</label>
+            <input type="range" id="qualityRange" min="10" max="100" value="85" step="5">
+            <span id="qualityValue">85%</span>
+        </div>
+
+        <div>
+            <label>Output:</label>
+            <select id="outputFormat">
+                <option value="pdf">PDF</option>
+                <option value="zip">ZIP</option>
+            </select>
+        </div>
+
+        <div id="splitRow">
+            <label>Split PDF:</label>
+            <input type="number" id="splitSize" min="1" max="1000" value="20" step="1">
+            <span>images per file</span>
+        </div>
+
+        <div>
+            <button id="prevPage">◀ Prev</button>
+            <span id="pageInfo">Page 1 / 1</span>
+            <button id="nextPage">Next ▶</button>
+        </div>
+
+        <div>
+            <button id="saveBtn">💾 Save Page</button>
+            <button id="saveAllBtn">⬇️ Download All</button>
+        </div>
+
+        <div id="progressBar">0%</div>
+    </div>
+
+    <canvas id="pdfCanvas"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script type="module">
+        import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.394/+esm';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.394/build/pdf.worker.min.mjs';
+
+        const GRAYSCALE_FILTER = 'grayscale(100%)';
+        const BATCH_SIZE = 10;
+        const DEFAULT_DPI = 150;
+
+        const $ = id => document.getElementById(id);
+        const pdfCanvas = $('pdfCanvas');
+        const ctx = pdfCanvas.getContext('2d');
+
+        let pdfDoc = null, currentPage = 1, totalPages = 0;
+        let pdfFileName = 'document', pageDimensions = [];
+
+        // Show/hide split row based on output format
+        $('outputFormat').addEventListener('change', () => {
+            $('splitRow').style.display = $('outputFormat').value === 'pdf' ? '' : 'none';
+        });
+
+        $('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            pdfFileName = file.name.replace('.pdf', '');
+
+            try {
+                pdfDoc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+                totalPages = pdfDoc.numPages;
+                currentPage = 1;
+
+                pageDimensions = [];
+                for (let i = 1; i <= totalPages; i++) {
+                    const page = await pdfDoc.getPage(i);
+                    const vp = page.getViewport({ scale: 1 });
+                    pageDimensions.push({ width: vp.width, height: vp.height });
+                }
+
+                $('totalPages').textContent = totalPages;
+                updatePageControls();
+                await renderPage();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        });
+
+        function getScale() {
+            return parseInt($('dpiRange').value) / 72;
+        }
+
+        async function renderPage() {
+            const page = await pdfDoc.getPage(currentPage);
+            const scale = Math.min(getScale(), 2); // Limit preview to 2x
+            const viewport = page.getViewport({ scale });
+
+            pdfCanvas.width = viewport.width;
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.style.filter = GRAYSCALE_FILTER;
+
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            updateInfo();
+        }
+
+        function updateInfo() {
+            const dim = pageDimensions[currentPage - 1];
+            const scale = getScale();
+            const dpi = parseInt($('dpiRange').value);
+            $('outSize').textContent = `${Math.round(dim.width * scale)} × ${Math.round(dim.height * scale)}`;
+            $('dpiValue').textContent = `${dpi} DPI (${Math.round(scale * 100)}%)`;
+            $('qualityValue').textContent = $('qualityRange').value + '%';
+        }
+
+        function updatePageControls() {
+            $('pageInfo').textContent = `Page ${currentPage} / ${totalPages}`;
+            $('prevPage').disabled = currentPage <= 1;
+            $('nextPage').disabled = currentPage >= totalPages;
+        }
+
+        $('prevPage').addEventListener('click', async () => {
+            if (currentPage > 1) { currentPage--; await renderPage(); updatePageControls(); }
+        });
+
+        $('nextPage').addEventListener('click', async () => {
+            if (currentPage < totalPages) { currentPage++; await renderPage(); updatePageControls(); }
+        });
+
+        $('dpiRange').addEventListener('input', updateInfo);
+        $('qualityRange').addEventListener('input', updateInfo);
+
+        async function renderPageToData(pageNum, asBlob = false) {
+            const page = await pdfDoc.getPage(pageNum);
+            const scale = getScale();
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const canvasCtx = canvas.getContext('2d', { alpha: false });
+
+            canvasCtx.fillStyle = '#FFFFFF';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: canvasCtx, viewport }).promise;
+
+            canvasCtx.filter = GRAYSCALE_FILTER;
+            canvasCtx.drawImage(canvas, 0, 0);
+
+            const quality = parseInt($('qualityRange').value) / 100;
+
+            if (asBlob) return new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+            return canvas.toDataURL('image/jpeg', quality);
+        }
+
+        function downloadBlob(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function updateProgress(completed, total) {
+            $('progressBar').textContent = `${completed} / ${total}`;
+        }
+
+        async function processInBatches(processor) {
+            const results = [];
+            for (let i = 0; i < totalPages; i += BATCH_SIZE) {
+                const end = Math.min(i + BATCH_SIZE, totalPages);
+                const batch = [];
+                for (let j = i; j < end; j++) {
+                    batch.push(processor(j + 1));
+                }
+                results.push(...await Promise.all(batch));
+                updateProgress(end, totalPages);
+            }
+            return results;
+        }
+
+        async function saveAsZip() {
+            const zip = new JSZip();
+
+            const pages = await processInBatches(async (pageNum) => ({
+                pageNum,
+                blob: await renderPageToData(pageNum, true)
+            }));
+
+            pages.forEach(({ pageNum, blob }) => {
+                zip.file(`${pdfFileName}_page${String(pageNum).padStart(3, '0')}.jpg`, blob);
+            });
+
+            $('progressBar').textContent = 'Creating ZIP...';
+            downloadBlob(await zip.generateAsync({ type: 'blob', compression: 'STORE' }), `${pdfFileName}.zip`);
+        }
+
+        async function saveAsPdf() {
+            const { jsPDF } = window.jspdf;
+            const dpi = parseInt($('dpiRange').value);
+            const splitSize = parseInt($('splitSize').value) || 20;
+
+            const pages = await processInBatches(async (pageNum) => ({
+                pageNum,
+                dataUrl: await renderPageToData(pageNum, false)
+            }));
+
+            pages.sort((a, b) => a.pageNum - b.pageNum);
+
+            $('progressBar').textContent = 'Creating PDF...';
+
+            // Calculate number of PDF files needed
+            const numPdfs = Math.ceil(pages.length / splitSize);
+
+            for (let pdfIndex = 0; pdfIndex < numPdfs; pdfIndex++) {
+                const startIdx = pdfIndex * splitSize;
+                const endIdx = Math.min(startIdx + splitSize, pages.length);
+                const pdfPages = pages.slice(startIdx, endIdx);
+
+                let pdf = null;
+
+                pdfPages.forEach(({ pageNum, dataUrl }, index) => {
+                    const dim = pageDimensions[pageNum - 1];
+                    const scale = dpi / 72;
+                    // Convert pixel dimensions to points (72 DPI) for PDF page size
+                    const widthPt = dim.width;
+                    const heightPt = dim.height;
+                    // Image dimensions in pixels
+                    const imgWidthPx = dim.width * scale;
+                    const imgHeightPx = dim.height * scale;
+                    
+                    const orientation = widthPt > heightPt ? 'landscape' : 'portrait';
+
+                    if (index === 0) {
+                        pdf = new jsPDF({ orientation, unit: 'pt', format: [widthPt, heightPt] });
+                    } else {
+                        pdf.addPage([widthPt, heightPt], orientation);
+                    }
+                    
+                    // Add image at full page size, jsPDF will handle the DPI based on image resolution
+                    pdf.addImage(dataUrl, 'JPEG', 0, 0, widthPt, heightPt, undefined, 'FAST');
+                });
+
+                // Generate filename with part number if split
+                const filename = numPdfs > 1 
+                    ? `${pdfFileName}_part${String(pdfIndex + 1).padStart(2, '0')}.pdf`
+                    : `${pdfFileName}.pdf`;
+
+                pdf.save(filename);
+
+                $('progressBar').textContent = `Saved ${pdfIndex + 1} / ${numPdfs} PDF files`;
+            }
+        }
+
+        $('saveBtn').addEventListener('click', async () => {
+            if (!pdfDoc) return;
+            $('saveBtn').disabled = true;
+            $('saveBtn').textContent = '⏳...';
+
+            try {
+                downloadBlob(await renderPageToData(currentPage, true), `${pdfFileName}_page${currentPage}.jpg`);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                $('saveBtn').disabled = false;
+                $('saveBtn').textContent = '💾 Save Page';
+            }
+        });
+
+        $('saveAllBtn').addEventListener('click', async () => {
+            if (!pdfDoc) return;
+            $('saveAllBtn').disabled = $('saveBtn').disabled = true;
+
+            try {
+                await ($('outputFormat').value === 'zip' ? saveAsZip() : saveAsPdf());
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                $('saveAllBtn').disabled = $('saveBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

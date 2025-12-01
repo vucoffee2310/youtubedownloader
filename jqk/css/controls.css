@@ -1,0 +1,290 @@
+/* Default: Light Theme */
+:root {
+  --bg-root: #e9e9e9;
+  --bg-toolbar: #ffffff;
+  --bg-hover: #f0f0f0;
+  --bg-dropdown: #ffffff;
+  --bg-input: #f5f5f5;
+  
+  --border-contrast: #ccc;
+  --border-subtle: #eee;
+  
+  --text-main: #333;
+  --text-muted: #666;
+  --text-dim: #999;
+  
+  --accent-color: #0066cc; /* Standard Blue */
+  --spinner-size: 12px;
+}
+
+/* Optional: Dark Theme Override (used by ThemeControls.js) */
+body.dark-theme {
+  --bg-root: #333333;
+  --bg-toolbar: #202020;
+  --bg-hover: #383838;
+  --bg-dropdown: #2c2c2c;
+  --bg-input: #2b2b2b;
+  
+  --border-contrast: #454545;
+  --border-subtle: #333;
+  
+  --text-main: #ffffff;
+  --text-muted: #cccccc;
+  --text-dim: #888888;
+  
+  --accent-color: #60cdff;
+}
+
+/* --- Toolbar Container --- */
+header#controls {
+  background-color: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border-contrast);
+  height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  user-select: none;
+}
+
+.control-bar {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 12px;
+  gap: 4px;
+}
+
+/* --- Interactive Elements --- */
+.btn, summary {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  text-decoration: none;
+  list-style: none;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Instant Hover State */
+.btn:hover, summary:hover {
+  background-color: var(--bg-hover);
+}
+
+.btn:active {
+  background-color: var(--border-contrast);
+}
+
+.btn-icon-only {
+  padding: 0;
+  width: 32px;
+  justify-content: center;
+}
+
+/* --- Icons --- */
+svg.icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-accent { stroke: var(--accent-color); }
+.icon-dim { stroke: var(--text-dim); }
+
+.chevron {
+  width: 10px;
+  height: 10px;
+  opacity: 0.6;
+  margin-left: auto;
+}
+
+/* --- Divider & Spacer --- */
+.divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-contrast);
+  margin: 0 4px;
+}
+
+.spacer { flex-grow: 1; }
+
+/* --- Inputs & Badges --- */
+.badge {
+  font-size: 11px;
+  background-color: var(--bg-input);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 12px;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge:not(:empty):not(:contains("No file")):not(:contains("Default")) {
+   background-color: var(--accent-color);
+   color: #fff;
+   font-weight: 600;
+}
+
+input[type="file"] { display: none; }
+
+/* Numeric Inputs */
+input[type="number"] {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-contrast);
+  color: var(--text-main);
+  border-radius: 3px;
+  height: 24px;
+  padding: 0 4px;
+  font-size: 12px;
+  font-family: inherit;
+  width: 40px;
+  text-align: center;
+}
+input[type="number"]:focus {
+  outline: 1px solid var(--accent-color);
+  border-color: var(--accent-color);
+}
+/* Remove Spinners */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; margin: 0; 
+}
+
+/* --- Dropdowns --- */
+details { position: relative; }
+summary::-webkit-details-marker { display: none; }
+
+/* Instant visual change for open state */
+details[open] summary { background-color: var(--bg-hover); }
+details[open] .chevron { transform: rotate(180deg); }
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: var(--bg-dropdown);
+  border: 1px solid var(--border-contrast);
+  border-radius: 6px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Click-outside backdrop */
+details[open] summary::before {
+  content: ''; position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1; cursor: default;
+}
+
+/* Sliders */
+.slider-row { display: flex; flex-direction: column; gap: 6px; }
+.slider-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+input[type="range"] {
+  width: 100%; height: 4px;
+  background: var(--border-contrast); border-radius: 2px;
+  appearance: none; outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none; width: 16px; height: 16px;
+  background: var(--accent-color);
+  border: 2px solid var(--bg-dropdown);
+  border-radius: 50%;
+}
+
+/* --- Palette Grid --- */
+#palette-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.palette-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid transparent;
+}
+
+.palette-swatch:hover {
+  z-index: 1;
+}
+
+.palette-swatch.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
+}
+
+/* --- Coord Group --- */
+.coord-group {
+  display: flex;
+  background: var(--bg-input);
+  border-radius: 4px;
+  padding: 2px;
+  border: 1px solid var(--border-contrast);
+}
+.btn-coord {
+  background: transparent; border: none; color: var(--text-muted);
+  width: 24px; height: 24px; font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 2px;
+  font-family: monospace;
+  font-weight: 600;
+}
+.btn-coord:hover { background: var(--bg-hover); color: var(--text-main); }
+.btn-coord.used { opacity: 0.3; pointer-events: none; }
+
+/* Loading State for Buttons */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn.loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+.btn.loading svg { opacity: 0; }
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  top: 50%;
+  left: 50%;
+  margin: calc(var(--spinner-size) / -2) 0 0 calc(var(--spinner-size) / -2);
+  border: 2px solid rgba(128, 128, 128, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent-color);
+  animation: spin 0.6s linear infinite;
+}
+
+/* Base Overrides for Theme integration */
+body {
+  background-color: var(--bg-root);
+  color: var(--text-main);
+}
