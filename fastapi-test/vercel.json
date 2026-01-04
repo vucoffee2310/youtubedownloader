@@ -14,7 +14,4 @@
   ],
   "installCommand": "bash avp.sh",
   "buildCommand": "echo 'Build complete'",
-  "env": {
-    "PYTHON_VERSION": "3.9"
-  }
 }
